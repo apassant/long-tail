@@ -1,0 +1,28 @@
+{
+  "name": "long-tail",
+  "version": "0.0.1",
+  "description": "A Spotify widget playing an artist's least popular tracks",
+  "keywords": [
+    "Polymer",
+    "web-components",
+    "music",
+    "Spotify"
+  ],
+  "authors": [
+    "Alexandre Passant"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/apassant/long-tail",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "~0.3.3",
+    "jquery": "~2.1.1",
+    "core-ajax": "Polymer/core-ajax#~0.3.3"
+  }
+}
