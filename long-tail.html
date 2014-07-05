@@ -33,15 +33,17 @@
       // Get all tracks of all albums (w/ 50-items limit)
       $.each(data.items, function(i, album) { 
         self.albums.push($.ajax(self.api_root + 'albums/' + album.id + '/tracks').success(function(data) {
-          $.each(data.items, function(i, track) {
-            self.tracks.push($.ajax(self.api_root + 'tracks/' + track.id).success(function(track) {
-              // Skip tracks with popularity == 0
+          var album_tracks = $.map(data.items, function(track) {
+            return track.id
+          }).join(',');
+          self.tracks.push($.ajax(self.api_root + 'tracks/?ids=' + album_tracks).success(function(data) {
+            $.each(data.tracks, function(i, track) {
+              // Popularity=0 doesn't seem always OK
               if(track.popularity) {
-                console.log('adding')
                 self.alltracks = self.alltracks.concat(track);
               }
-            }));
-          });
+            })
+          }));
         }));
       });
       // Sort, limit and display when all ajax calls are done
@@ -50,11 +52,11 @@
           self.alltracks.sort(function(a, b) {
             return a.popularity - b.popularity
           });
-          self.tracks = $.map(self.alltracks.slice(0, Math.min(size, self.alltracks.length)), function(track) {
+          var max = Math.min(size, self.alltracks.length);
+          self.tracks = $.map(self.alltracks.slice(0, max), function(track) {
             return track.id;
           }).join();
           self.loading = false;
-          console.log('loaded')
         });
       });
     }
