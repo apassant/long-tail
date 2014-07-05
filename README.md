@@ -1,7 +1,14 @@
-long-tail
-=========
+<long-tail>
+===========
 
 A Spotify widget playing an artist's least popular tracks - built with polymer
+
+Demo and background
+-------------------
+
+* Web-app using the widget: http://longtail.mdg.io
+* Background reading: http://apassant.net/2014/07/05/long-tail-spotify-polymer
+
 
 Install
 -------
@@ -37,12 +44,6 @@ Arguments
 
 * artist: A spotify artist ID
 * size: Number of tracks (max/default = 50)
-
-
-Demo
-----
-
-http://longtail.mdg.io
 
 License
 -------
