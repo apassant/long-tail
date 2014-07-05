@@ -5,24 +5,24 @@
 <polymer-element name="long-tail" attributes="artist, size">
 
   <template>
-      <iframe src="https://embed.spotify.com/?uri=spotify:trackset::{{tracks}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+    <div id="loading" hidden?="{{!loading}}">Loading...</div>
+    <iframe src="https://embed.spotify.com/?uri=spotify:trackset::{{tracks}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
   </template>
 
   <script>
   Polymer({
     created: function() {
       this.api_root = 'https://api.spotify.com/v1/';
+      this.loading = false;
     },
     ready: function() {
       if(this.artist) {
+        this.loading = true;
         var self = this;
         $.ajax(this.api_root + 'artists/' + this.artist + '/albums?album_type=album&limit=50').success(function(data) {
           return self.getTracks(data, self.size);
         })
       }
-    },
-    attributeChanged: function(attrName, oldVal, newVal) {
-      return this.ready();
     },
     getTracks: function(data, size) {
       var size = size || 50;
@@ -37,6 +37,7 @@
             self.tracks.push($.ajax(self.api_root + 'tracks/' + track.id).success(function(track) {
               // Skip tracks with popularity == 0
               if(track.popularity) {
+                console.log('adding')
                 self.alltracks = self.alltracks.concat(track);
               }
             }));
@@ -52,6 +53,8 @@
           self.tracks = $.map(self.alltracks.slice(0, Math.min(size, self.alltracks.length)), function(track) {
             return track.id;
           }).join();
+          self.loading = false;
+          console.log('loaded')
         });
       });
     }
