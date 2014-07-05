@@ -5,39 +5,51 @@
 <polymer-element name="long-tail" attributes="artist, size">
 
   <template>
-    <iframe hidden?="{{!tracks}}" src="https://embed.spotify.com/?uri=spotify:trackset::{{tracks}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
-    <core-ajax url="https://api.spotify.com/v1/artists/{{artist}}/albums?album_type=album&limit=50" auto handleAs="json" on-core-response={{parse}}></core-ajax>
+      <iframe src="https://embed.spotify.com/?uri=spotify:trackset::{{tracks}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
   </template>
 
   <script>
   Polymer({
-    parse: function(e, response) {
-      var api_root = 'https://api.spotify.com/v1/';
-      var size = this.size || 50;
-      var element = this;
-      var tracks = [];
-      var albums = [];
-      var alltracks = [];
+    created: function() {
+      this.api_root = 'https://api.spotify.com/v1/';
+    },
+    ready: function() {
+      if(this.artist) {
+        var self = this;
+        $.ajax(this.api_root + 'artists/' + this.artist + '/albums?album_type=album&limit=50').success(function(data) {
+          return self.getTracks(data, self.size);
+        })
+      }
+    },
+    attributeChanged: function(attrName, oldVal, newVal) {
+      return this.ready();
+    },
+    getTracks: function(data, size) {
+      var size = size || 50;
+      this.tracks = [];
+      this.albums = [];
+      this.alltracks = [];
+      var self = this;
       // Get all tracks of all albums (w/ 50-items limit)
-      $.each(response.response.items, function(i, album) { 
-        albums.push($.ajax(api_root + 'albums/' + album.id + '/tracks').success(function(data) {
-	  $.each(data.items, function(i, track) {
-            tracks.push($.ajax(api_root + 'tracks/' + track.id).success(function(track) {  
+      $.each(data.items, function(i, album) { 
+        self.albums.push($.ajax(self.api_root + 'albums/' + album.id + '/tracks').success(function(data) {
+          $.each(data.items, function(i, track) {
+            self.tracks.push($.ajax(self.api_root + 'tracks/' + track.id).success(function(track) {
               // Skip tracks with popularity == 0
               if(track.popularity) {
-                alltracks = alltracks.concat(track);
+                self.alltracks = self.alltracks.concat(track);
               }
             }));
           });
         }));
       });
       // Sort, limit and display when all ajax calls are done
-      $.when.apply($, albums).done(function() {
-        $.when.apply($, tracks).done(function() {
-          alltracks.sort(function(a, b) {
+      $.when.apply($, self.albums).done(function() {
+        $.when.apply($, self.tracks).done(function() {
+          self.alltracks.sort(function(a, b) {
             return a.popularity - b.popularity
           });
-          element.tracks = $.map(alltracks.slice(0, Math.min(size, alltracks.length)), function(track) {
+          self.tracks = $.map(self.alltracks.slice(0, Math.min(size, self.alltracks.length)), function(track) {
             return track.id;
           }).join();
         });
@@ -47,3 +59,4 @@
   </script>
 
 </polymer-element>
+
